@@ -61,7 +61,7 @@ Parameters:
     Default: 'yes'
   AMIId:
     Description: ID of the AMI to deploy
-    Type: String
+    Type: AWS::EC2::Image::Id
   VolumeSize:
     Description: The EC2 volume size (in GB)
     Type: Number
@@ -147,7 +147,7 @@ Resources:
               owner: root
               group: root
             /lib/systemd/system/cfn-hup.service:
-              content: !Sub |
+              content: |
                 [Unit]
                 Description=cfn-hup daemon
 
