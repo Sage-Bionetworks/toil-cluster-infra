@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Resources:
   ClusterRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -11,10 +11,17 @@ Resources:
               Service:
                 - ec2.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-        - 'arn:aws:iam::563295687221:policy/toil-cluster-instance-policy'
+        - arn:aws:iam::563295687221:policy/toil-cluster-instance-policy
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: toil-cluster-instance-role
+      Path: "/"
+      Roles:
+        - toil-cluster-instance-role
   ClusterPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -22,7 +29,7 @@ Resources:
       ManagedPolicyName: toil-cluster-instance-policy
       Path: "/"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
           - Effect: Allow
             Action:
