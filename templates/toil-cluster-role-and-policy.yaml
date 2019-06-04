@@ -7,7 +7,6 @@ Resources:
   ClusterRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${ClusterName}-role"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -23,7 +22,6 @@ Resources:
   ClusterInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Ref ClusterRole
       Path: "/"
       Roles:
         - !Ref ClusterRole
