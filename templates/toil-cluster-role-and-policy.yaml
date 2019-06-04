@@ -7,11 +7,7 @@ Resources:
   ClusterRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join
-        - "-"
-        -
-          - !Ref ClusterName
-          - "role"
+      RoleName: !Sub "${ClusterName}-role"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -35,11 +31,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: Minimal permissions for toil instances.
-      ManagedPolicyName: !Join
-        - "-"
-        -
-          - !Ref ClusterName
-          - "-policy"
+      ManagedPolicyName: !Sub "${ClusterName}-policy"
       Path: "/"
       PolicyDocument:
         Version: 2012-10-17
@@ -90,22 +82,8 @@ Resources:
               - s3:PutObjectTagging
               - s3:PutObjectVersionTagging
               - s3:ReplicateTags
-            Resource: !Join
-              - ""
-              -
-                - "arn:aws:s3:::"
-                - !Ref ClusterName
-                - "*"
+            Resource: !Sub "arn:aws:s3:::${ClusterName}*"
           - Effect: Allow
             Action:
               - sdb:*
-            Resource: !Join
-              - ""
-              -
-                - "arn:aws:sdb:"
-                - !Ref "AWS::Region"
-                - ":"
-                - !Ref "AWS::AccountId"
-                - ":domain/"
-                - !Ref ClusterName
-                - "*"
+            Resource: !Sub "arn:aws:sdb:${AWS::Region}:${AWS::AccountId}:domain/${ClusterName}*"
