@@ -1,8 +1,17 @@
 AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ClusterName:
+    Description: Name of the cluster that will use these resources.
+    Type: String
 Resources:
   ClusterRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Join
+        - "-"
+        -
+          - !Ref ClusterName
+          - "role"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -12,21 +21,25 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
-      Path: /
+      Path: "/"
       ManagedPolicyArns:
-        - arn:aws:iam::563295687221:policy/toil-cluster-instance-policy
+        - !Ref ClusterPolicy
   ClusterInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: toil-cluster-instance-role
+      InstanceProfileName: !Ref ClusterRole
       Path: "/"
       Roles:
-        - toil-cluster-instance-role
+        - !Ref ClusterRole
   ClusterPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: Minimal permissions for toil instances.
-      ManagedPolicyName: toil-cluster-instance-policy
+      ManagedPolicyName: !Join
+        - "-"
+        -
+          - !Ref ClusterName
+          - "-policy"
       Path: "/"
       PolicyDocument:
         Version: 2012-10-17
@@ -52,6 +65,9 @@ Resources:
               - ec2:StopInstances
               - ec2:TerminateInstances
               - iam:PassRole
+            Resource: "*"
+          - Effect: Allow
+            Action:
               - s3:AbortMultipartUpload
               - s3:CreateBucket
               - s3:DeleteBucket
@@ -74,5 +90,22 @@ Resources:
               - s3:PutObjectTagging
               - s3:PutObjectVersionTagging
               - s3:ReplicateTags
+            Resource: !Join
+              - ""
+              -
+                - "arn:aws:s3:::"
+                - !Ref ClusterName
+                - "*"
+          - Effect: Allow
+            Action:
               - sdb:*
-            Resource: "*"
+            Resource: !Join
+              - ""
+              -
+                - "arn:aws:sdb:"
+                - !Ref "AWS::Region"
+                - ":"
+                - !Ref "AWS::AccountId"
+                - ":domain/"
+                - !Ref ClusterName
+                - "*"
