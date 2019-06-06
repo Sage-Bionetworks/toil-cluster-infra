@@ -1,2 +1,0 @@
-template_path: remote/toil-cluster-role-and-policy.yaml
-stack_name: toil-cluster-shared-role
