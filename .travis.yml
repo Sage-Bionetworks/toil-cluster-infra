@@ -31,4 +31,3 @@ jobs:
         - ./lint_stack.sh -r
         # enable after adding sceptre templates to config/prod folder
         # - travis_wait 30 sceptre launch prod --yes
-
