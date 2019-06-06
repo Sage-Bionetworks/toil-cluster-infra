@@ -36,6 +36,7 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
+              - ec2:AuthorizeSecurityGroupIngress
               - ec2:CancelSpotInstanceRequests
               - ec2:CreateSecurityGroup
               - ec2:CreateTags
