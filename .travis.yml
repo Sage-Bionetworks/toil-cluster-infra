@@ -23,12 +23,12 @@ jobs:
   include:
     - stage: validate
       script:
-        # TODO: uncomment yamllint and cfn-lint checks after adding templates to templates folder
-        # - yamllint ./config ./templates
+        - yamllint ./config ./templates
         - ./lint_stack.sh -l ./config/prod
-        # - cfn-lint ./templates/**/*
+        - cfn-lint ./templates/**/*
     - stage: deploy
       script:
         - ./lint_stack.sh -r
-        - travis_wait 30 sceptre launch prod --yes
+        # enable after adding sceptre templates to config/prod folder
+        # - travis_wait 30 sceptre launch prod --yes
 
