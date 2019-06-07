@@ -19,6 +19,7 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - !Ref ClusterPolicy
+        - !Ref TagRootVolumePolicy
   ClusterInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -29,7 +30,6 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: Minimal permissions for toil instances.
-      ManagedPolicyName: !Sub "${ClusterName}-policy"
       Path: "/"
       PolicyDocument:
         Version: 2012-10-17
@@ -88,3 +88,16 @@ Resources:
             Action:
               - sdb:*
             Resource: !Sub "arn:aws:sdb:${AWS::Region}:${AWS::AccountId}:domain/${ClusterName}*"
+  TagRootVolumePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Allow instances to apply tags to root volume. Like TagRootVolumeRole in aws-infra/essentials.
+      Path: "/"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "ec2:Describe*"
+              - "ec2:CreateTags"
+            Resource: "*"
