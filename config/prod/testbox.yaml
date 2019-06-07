@@ -1,0 +1,33 @@
+# Provision an EC2 instance
+template_path: toil-instance.yaml
+stack_name: testbox
+parameters:
+  # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
+  Department: "Platform"
+  # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
+  Project: "Infrastructure"
+  # The resource owner
+  OwnerEmail: "tess.thyer@sagebase.org"
+
+  # Default account settings, leave alone unless you plan to override
+  VpcName: "snowflake"
+  KeyName: "toil"
+  AMIId: "ami-0111112222aaaabbbbcccc"  # <-- your jumpbox AMI, or leader AMI
+
+  # Settings have default values but can be overriden. Set the below
+  # parameters *only* if you want to override the defaults.
+
+  # (Optional) EC2 instance type, default is "t2.nano" (other available types https://aws.amazon.com/ec2/pricing/on-demand/)
+  # InstanceType: "t2.medium"
+  # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
+  # VolumeSize: "50"
+  # (Optional) Base instance on AMI (default: ami-082278746f893d99c) (supported distros: AWS linux)
+  # AMIId: "ami-0de53d8956e8dcf80"
+  # (Optional) Run EC2 in a subnet (default: PrivateSubnet) (valid values: PrivateSubnet or PublicSubnet)
+  # VpcSubnet: "PublicSubnet"
+  # (Optional) Set true to enable daily backups (default: false)
+
+# For CI system (do not change)
+hooks:
+  after_create:
+    - !ec2_notify "{{stack_group_config.aws_account_name}} {{stack_group_config.aws_account_email}}"
