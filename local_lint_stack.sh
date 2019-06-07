@@ -54,7 +54,7 @@ verify_unique() {
 
 # Verify that new stack_name contains valid chars and is a certain length
 verify_name_constraint() {
-  if [[ ! $new_stack_name =~ $STACK_NAME_CONSTRAINT ]]; then
+  if [[ ! "$new_stack_name" =~ "$STACK_NAME_CONSTRAINT" ]]; then
     printf "\e[1;31mERROR: Stack name \"${new_stack_name}\" contains invalid characters. "
     printf "A stack name can contain only alphanumeric characters (case sensitive) and hyphens. "
     printf "It must start with an alphabetic character and cannot be longer than 128 characters.\e[0m\n"
