@@ -24,6 +24,9 @@ jobs:
     - stage: validate
       script:
         - yamllint ./config ./templates
+        - ls -al
+        - ls -al config
+        - ls -al config/prod
         - ./lint_stack.sh -l ./config/prod
         - cfn-lint ./templates/**/*
     - stage: deploy
