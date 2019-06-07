@@ -27,7 +27,10 @@ jobs:
         - ls -al
         - ls -al config
         - ls -al config/prod
-        - ./lint_stack.sh -l ./config/prod
+        - /bin/grep -r -w -h 'stack_name:' ./config/prod
+        - /bin/grep -r -w -h 'stack_name:' ./config/prod | /usr/bin/cut -d':' -f2
+        - /bin/grep -r -w -h 'stack_name:' ./config/prod | /usr/bin/cut -d':' -f2 | /usr/bin/awk '{$1=$1};1'
+        - ./lint_stack.sh -l config/prod
         - cfn-lint ./templates/**/*
     - stage: deploy
       script:
