@@ -24,11 +24,11 @@ jobs:
     - stage: validate
       script:
         - yamllint ./config ./templates
-        - ./lint_stack.sh -l ./config/prod || travis_terminate 1
+        - ./local_lint_stack.sh -l ./config/prod || travis_terminate 1
         - cfn-lint ./templates/**/*
     - stage: deploy
       script:
-        - ./lint_stack.sh -r || travis_terminate 1
+        - ./local_lint_stack.sh -r || travis_terminate 1
         # enable after adding sceptre templates to config/prod folder
         # - travis_wait 30 sceptre launch prod --yes
 
