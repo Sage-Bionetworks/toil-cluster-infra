@@ -99,3 +99,9 @@ Resources:
               - "ec2:Describe*"
               - "ec2:CreateTags"
             Resource: "*"
+Outputs:
+  ToilClusterRole:
+    Description: Role for toil instances.
+    Value: !GetAtt ClusterRole.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterRole'
