@@ -51,7 +51,7 @@ Resources:
               - "kms:GenerateDataKey*"
               - "kms:DescribeKey"
             Resource: "*"
-  AWSKmsInfraKeyAlias:
+  AWSKmsToilInfraKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Join
@@ -59,4 +59,4 @@ Resources:
         - - 'alias/'
           - !Ref AWS::StackName
           - '/InfraKey'
-      TargetKeyId: !Ref AWSKmsInfraKey
+      TargetKeyId: !Ref AWSKmsToilInfraKeyAlias
