@@ -1,0 +1,2 @@
+template_path: toil-infra-essentials.yaml
+stack_name: toil-infra-essentials
