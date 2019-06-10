@@ -59,4 +59,4 @@ Resources:
         - - 'alias/'
           - !Ref AWS::StackName
           - '/InfraKey'
-      TargetKeyId: !Ref AWSKmsToilInfraKeyAlias
+      TargetKeyId: !Ref AWSKmsInfraKey
