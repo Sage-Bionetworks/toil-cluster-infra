@@ -61,6 +61,75 @@ Conditions:
 Resources:
   Ec2Instance:
     Type: 'AWS::EC2::Instance'
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          SetupCfn:
+            - configure_cfn
+          SetupVolume:
+            - TagRootVolume
+        configure_cfn:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                verbose=true
+                interval=5
+              mode: "000400"
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume --region ${AWS::Region}
+              mode: "000400"
+              owner: root
+              group: root
+            /lib/systemd/system/cfn-hup.service:
+              content: |
+                [Unit]
+                Description=cfn-hup daemon
+
+                [Service]
+                Type=simple
+                ExecStart=/opt/aws/bin/cfn-hup
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+              mode: "000400"
+              owner: root
+              group: root
+          commands:
+            01_enable_cfn-hup:
+              command: "/bin/systemctl enable cfn-hup.service"
+            02_start_cfn-hup:
+              command: "/bin/systemctl start cfn-hup.service"
+        TagRootVolume:
+          packages:
+            apt:
+              awscli: []
+          commands:
+            01_tag_root_disk:
+              command: !Join
+                - ''
+                - - "EC2_INSTANCE_ID=$(/usr/bin/curl -s http://169.254.169.254/latest/meta-data/instance-id) "
+                  - "ROOT_DISK_ID=$(/usr/bin/aws ec2 describe-volumes --region $AWS_REGION "
+                  - "--filters Name=attachment.instance-id,Values=$EC2_INSTANCE_ID "
+                  - "--query Volumes[].VolumeId --out text); "
+                  - "/usr/bin/aws ec2 create-tags --region $AWS_REGION --resources $ROOT_DISK_ID "
+                  - "--tags Key=Name,Value=$EC2_INSTANCE_ID-root Key=cloudformation:stack-name,Value=$STACK_NAME "
+                  - "Key=Department,Value=$DEPARTMENT Key=Project,Value=$PROJECT Key=OwnerEmail,Value=$OWNER_EMAIL"
+              env:
+                AWS_REGION: !Ref AWS::Region
+                STACK_NAME: !Ref AWS::StackName
+                DEPARTMENT: !Ref Department
+                PROJECT: !Ref Project
+                OWNER_EMAIL: !Ref OwnerEmail
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
@@ -81,6 +150,15 @@ Resources:
             'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'
       IamInstanceProfile: !ImportValue
         'Fn::Sub': '${AWS::Region}-essentials-TagRootVolumeProfile'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          /usr/bin/apt-get install -y python-pip
+          /usr/bin/apt-get install -y python-setuptools
+          /bin/mkdir -p /opt/aws/bin
+          /usr/bin/python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ec2Instance --region ${AWS::Region}
       Tags:
         - Key: "parkmycloud"
           Value: !Ref ParkMyCloudManaged
