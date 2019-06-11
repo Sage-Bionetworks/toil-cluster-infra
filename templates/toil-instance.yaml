@@ -49,7 +49,7 @@ Parameters:
   AMIId:
     Description: ID of the AMI to deploy
     Type: 'AWS::EC2::Image::Id'
-  RoleStack:
+  RoleStackName:
     Description: Stack name of the instance profile role.
     Type: String
   VolumeSize:
@@ -152,7 +152,7 @@ Resources:
           SubnetId: !ImportValue
             'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'
       IamInstanceProfile: !ImportValue
-        'Fn::Sub': '${AWS::Region}-${RoleStack}-ToilClusterInstanceProfile'
+        'Fn::Sub': '${AWS::Region}-${RoleStackName}-ToilClusterInstanceProfile'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
