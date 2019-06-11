@@ -110,3 +110,8 @@ Outputs:
     Value: !GetAtt ClusterRole.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterRoleArn'
+  ToilClusterInstanceProfile:
+    Description: Instance Profile for toil instances.
+    Value: !Ref ClusterInstanceProfile
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterInstanceProfile'
