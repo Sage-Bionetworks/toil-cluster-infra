@@ -102,16 +102,6 @@ Resources:
 Outputs:
   ToilClusterRole:
     Description: Role for toil instances.
-    Value: !Ref ClusterRole
-    Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterRole'
-  ToilClusterRoleArn:
-    Description: Role for toil instances.
     Value: !GetAtt ClusterRole.Arn
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterRoleArn'
-  ToilClusterInstanceProfile:
-    Description: Instance Profile for toil instances.
-    Value: !Ref ClusterInstanceProfile
-    Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterInstanceProfile'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ToilClusterRole'
