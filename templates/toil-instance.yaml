@@ -58,14 +58,12 @@ Parameters:
     Default: 8
     MinValue: 8
     MaxValue: 1000
-  # RsaKey:
-  #   Description: RSA key for instance
-  #   Type: String
-  #   Default: !ssm /toil-cluster-infra/ssh_key
-  # PublicRsaKey:
-  #   Description: Public RSA key for instance
-  #   Type: String
-  #   Default: !ssm /toil-cluster-infra/public_ssh_key
+  RsaKey:
+    Description: RSA key for instance
+    Type: String
+  PublicRsaKey:
+    Description: Public RSA key for instance
+    Type: String
 Conditions:
   PublicEc2Resources: !Or [!Equals [ !Ref VpcSubnet, PublicSubnet ], !Equals [ !Ref VpcSubnet, PublicSubnet1 ], !Equals [ !Ref VpcSubnet, PublicSubnet2 ] ]
   HasKeyName: !Not [!Equals ["", !Ref KeyName]]
@@ -79,8 +77,8 @@ Resources:
             - configure_cfn
           SetupVolume:
             - TagRootVolume
-          # SetupSsh:
-          #   - WriteSshFiles
+          SetupSsh:
+            - WriteSshFiles
         configure_cfn:
           files:
             /etc/cfn/cfn-hup.conf:
@@ -98,7 +96,7 @@ Resources:
                 [cfn-auto-reloader-hook]
                 triggers=post.update
                 path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume --region ${AWS::Region}
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh --region ${AWS::Region}
               mode: "000400"
               owner: root
               group: root
@@ -143,18 +141,18 @@ Resources:
                 DEPARTMENT: !Ref Department
                 PROJECT: !Ref Project
                 OWNER_EMAIL: !Ref OwnerEmail
-        # WriteSshFiles:
-        #   files:
-        #     /home/ubuntu/.ssh/id_rsa:
-        #       content: !Ref RsaKey
-        #       mode: "000400"
-        #       owner: "ubuntu"
-        #       group: "ubuntu"
-        #     /home/ubuntu/.ssh/id_rsa.pub:
-        #       content: !Ref PublicRsaKey
-        #       mode: "000644"
-        #       owner: "ubuntu"
-        #       group: "ubuntu"
+        WriteSshFiles:
+          files:
+            /home/ubuntu/.ssh/id_rsa:
+              content: !Ref RsaKey
+              mode: "000400"
+              owner: "ubuntu"
+              group: "ubuntu"
+            /home/ubuntu/.ssh/id_rsa.pub:
+              content: !Ref PublicRsaKey
+              mode: "000644"
+              owner: "ubuntu"
+              group: "ubuntu"
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
@@ -182,7 +180,7 @@ Resources:
           /usr/bin/apt-get install -y python-setuptools
           /bin/mkdir -p /opt/aws/bin
           /usr/bin/python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume --region ${AWS::Region}
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ec2Instance --region ${AWS::Region}
       Tags:
         - Key: "parkmycloud"
