@@ -14,6 +14,9 @@ parameters:
   AMIId: "ami-032e0d8fe5cfa8c7f"  # toil-ubuntu ami
   RoleStackName: "rna-seq-reprocessing-instance-role-v001"
 
+  #RsaKey: !ssm /toil-cluster-infra/ssh_key
+  #PublicRsaKey: !ssm /toil-cluster-infra/public_ssh_key
+
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.
 

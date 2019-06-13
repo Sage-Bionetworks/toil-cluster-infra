@@ -58,6 +58,14 @@ Parameters:
     Default: 8
     MinValue: 8
     MaxValue: 1000
+  # RsaKey:
+  #   Description: RSA key for instance
+  #   Type: String
+  #   Default: !ssm /toil-cluster-infra/ssh_key
+  # PublicRsaKey:
+  #   Description: Public RSA key for instance
+  #   Type: String
+  #   Default: !ssm /toil-cluster-infra/public_ssh_key
 Conditions:
   PublicEc2Resources: !Or [!Equals [ !Ref VpcSubnet, PublicSubnet ], !Equals [ !Ref VpcSubnet, PublicSubnet1 ], !Equals [ !Ref VpcSubnet, PublicSubnet2 ] ]
   HasKeyName: !Not [!Equals ["", !Ref KeyName]]
@@ -71,6 +79,8 @@ Resources:
             - configure_cfn
           SetupVolume:
             - TagRootVolume
+          # SetupSsh:
+          #   - WriteSshFiles
         configure_cfn:
           files:
             /etc/cfn/cfn-hup.conf:
@@ -133,6 +143,18 @@ Resources:
                 DEPARTMENT: !Ref Department
                 PROJECT: !Ref Project
                 OWNER_EMAIL: !Ref OwnerEmail
+        # WriteSshFiles:
+        #   files:
+        #     /home/ubuntu/.ssh/id_rsa:
+        #       content: !Ref RsaKey
+        #       mode: "000400"
+        #       owner: "ubuntu"
+        #       group: "ubuntu"
+        #     /home/ubuntu/.ssh/id_rsa.pub:
+        #       content: !Ref PublicRsaKey
+        #       mode: "000644"
+        #       owner: "ubuntu"
+        #       group: "ubuntu"
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
