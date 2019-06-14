@@ -10,8 +10,8 @@ parameters:
   OwnerEmail: "tess.thyer@sagebase.org"
 
   VpcName: "sandcastlevpc"
-  KeyName: "toil"
-  AMIId: "ami-032e0d8fe5cfa8c7f"  # toil-ubuntu ami
+  KeyName: "{{stack_group_config.toil_key_pair}}"
+  AMIId: "{{stack_group_config.toil_ami}}"
   RoleStackName: "rna-seq-reprocessing-instance-role-v001"
 
   RsaKey: !ssm /toil-cluster-infra/SshKey
