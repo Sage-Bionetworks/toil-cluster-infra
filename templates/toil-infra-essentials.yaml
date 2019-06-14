@@ -3,6 +3,12 @@ Conditions:
   IsSandboxAccount: !Equals
     - !Ref AWS::AccountId
     - 563295687221
+Mappings:
+  AdminRoleArns:
+    "563295687221": 
+      Arn: "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69"
+    "055273631518": 
+      Arn: "arn:aws:iam::055273631518:role/accounts-AWSIAMAdminRole-JL0BF315YDU0"
 Resources:
   AWSKmsInfraKey:
     Type: "AWS::KMS::Key"
@@ -26,7 +32,7 @@ Resources:
                     - ':root'
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
-                - !If [IsSandboxAccount, "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69", !Ref "AWS::NoValue"]
+                - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
             Action:
               - "kms:Create*"
               - "kms:Describe*"
@@ -49,7 +55,7 @@ Resources:
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !ImportValue us-east-1-rna-seq-reprocessing-instance-role-v001-ToilClusterRoleArn
-                - !If [IsSandboxAccount, "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69", !Ref "AWS::NoValue"]
+                - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
             Action:
               - "kms:Encrypt"
               - "kms:Decrypt"
