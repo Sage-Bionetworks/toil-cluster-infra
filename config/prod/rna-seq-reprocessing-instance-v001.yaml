@@ -9,7 +9,7 @@ parameters:
   # The resource owner
   OwnerEmail: "tess.thyer@sagebase.org"
 
-  VpcName: "snowflake"
+  VpcName: "{{stack_group_config.default_vpc}}"
   KeyName: "toil"
   AMIId: "ami-032e0d8fe5cfa8c7f"  # toil-ubuntu ami
   RoleStackName: "rna-seq-reprocessing-instance-role-v001"
