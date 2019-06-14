@@ -10,7 +10,7 @@ parameters:
   OwnerEmail: "tess.thyer@sagebase.org"
 
   VpcName: "{{stack_group_config.default_vpc}}"
-  KeyName: "toil"
+  KeyName: "{{stack_group_config.toil_key_pair}}"
   AMIId: "ami-032e0d8fe5cfa8c7f"  # toil-ubuntu ami
   RoleStackName: "rna-seq-reprocessing-instance-role-v001"
 

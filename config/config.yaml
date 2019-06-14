@@ -2,3 +2,4 @@ project_code: sage-bionetworks
 profile: {{ var.profile | default("default") }}
 region: {{ var.region | default("us-east-1") }}
 admincentral_cf_bucket: "bootstrap-awss3cloudformationbucket-19qromfd235z9"
+toil_key_pair: "toil"
