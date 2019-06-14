@@ -22,7 +22,7 @@ Resources:
                     - ':root'
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
-                - "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69"
+                - !If [IsSandboxAccount, "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69", !Ref "AWS::NoValue"]
             Action:
               - "kms:Create*"
               - "kms:Describe*"
@@ -45,7 +45,7 @@ Resources:
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !ImportValue us-east-1-rna-seq-reprocessing-instance-role-v001-ToilClusterRoleArn
-                - "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69"
+                - !If [IsSandboxAccount, "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69", !Ref "AWS::NoValue"]
             Action:
               - "kms:Encrypt"
               - "kms:Decrypt"
@@ -62,3 +62,7 @@ Resources:
           - !Ref AWS::StackName
           - '/InfraKey'
       TargetKeyId: !Ref AWSKmsInfraKey
+Conditions:
+  IsSandboxAccount: !Equals
+    - !Ref AWS::AccountId
+    - 563295687221
