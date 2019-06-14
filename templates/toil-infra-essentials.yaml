@@ -1,13 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
-Conditions:
-  IsSandboxAccount: !Equals
-    - !Ref AWS::AccountId
-    - 563295687221
 Mappings:
   AdminRoleArns:
-    "563295687221": 
+    "563295687221":
       Arn: "arn:aws:iam::563295687221:role/accounts-AWSIAMAdminRole-1B5HUQPC19H69"
-    "055273631518": 
+    "055273631518":
       Arn: "arn:aws:iam::055273631518:role/accounts-AWSIAMAdminRole-JL0BF315YDU0"
 Resources:
   AWSKmsInfraKey:

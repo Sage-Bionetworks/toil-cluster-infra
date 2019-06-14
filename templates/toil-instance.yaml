@@ -171,6 +171,7 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             VolumeSize: !Ref VolumeSize
+            Encrypted: !Ref EncryptVolume
       NetworkInterfaces:
         - DeleteOnTermination: true
           DeviceIndex: "0"
