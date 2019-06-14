@@ -28,5 +28,5 @@ jobs:
         - cfn-lint ./templates/**/*
     - stage: deploy
       script:
-        - ./lint_stack.sh -r || travis_terminate 1
+        #- ./lint_stack.sh -r || travis_terminate 1
         - travis_wait 30 sceptre launch prod --yes
