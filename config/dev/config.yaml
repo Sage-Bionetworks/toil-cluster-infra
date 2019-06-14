@@ -1,5 +1,4 @@
 template_bucket_name: bootstrap-awss3cloudformationbucket-z6hnifi9i3p
-template_key_prefix: {{ environment_variable.TRAVIS_BRANCH | default("testing") }}
 # Sender for notification hooks
 aws_account_name: Sandbox
 aws_account_email: aws.sandbox@sagebase.org
