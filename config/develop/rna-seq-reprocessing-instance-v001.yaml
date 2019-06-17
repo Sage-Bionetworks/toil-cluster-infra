@@ -16,6 +16,8 @@ parameters:
 
   RsaKey: !ssm /toil-cluster-infra/SshKey
   PublicRsaKey: !ssm /toil-cluster-infra/PublicSshKey
+  ClusterName: rna-seq-reprocessing-toil-cluster-v001
+  ClusterSubnetId: "{{stack_group_config.default_subnet_id}}"
 
   # Settings have default values but can be overriden. Set the below
   # parameters *only* if you want to override the defaults.

@@ -5,3 +5,4 @@ aws_account_email: aws.scicomp@sagebase.org
 # Provisioner defaults
 default_key_pair: "scicomp"
 default_vpc: "snowflakevpc"
+default_subnet_id: "???"
