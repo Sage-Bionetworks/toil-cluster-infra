@@ -194,7 +194,7 @@ Resources:
                 Description=Cluster launch/destroy scripts
                 After=network.target nss-lookup.target
                 Wants=network.target nss-lookup.target
-                
+
                 [Service]
                 Type=oneshot
                 ExecStart=/bin/bash /home/ubuntu/create-toil-cluster.sh
