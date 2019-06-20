@@ -278,7 +278,6 @@ Resources:
           export DEBIAN_FRONTEND=noninteractive
           /usr/bin/apt-get -y update
           /usr/bin/apt-get -y upgrade
-          /usr/bin/apt-get -y dist-upgrade
           /usr/bin/apt-get install -y python-pip
           /usr/bin/apt-get install -y python-setuptools
           /usr/bin/apt-get install -y python3-pip
