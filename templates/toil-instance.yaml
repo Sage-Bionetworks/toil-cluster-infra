@@ -72,6 +72,30 @@ Parameters:
   PublicRsaKey:
     Description: Public RSA key for instance
     Type: String
+  ToilAppliance:
+    Description: Docker image to use for the toil instances.
+    Type: String
+    Default: 'quay.io/tessthyer/amp-rnaseq_reprocess:toil-3.20.0'
+  ClusterName:
+    Description: Name of the cluster, will be applied to all instances associated with it.
+    Type: String
+  ClusterLeaderNodeType:
+    Description: EC2 instance type for the leader node in the toil cluster.
+    Type: String
+    Default: 'm5.large'
+  ClusterLeaderStorage:
+    Description: Amount of disk in Gigabytes to reserve for the cluster leader.
+    Type: Number
+    Default: 100
+    MinValue: 50
+  ToilInstanceRoleName:
+    Description: The role that will be passed to the leader when the jumpbox creates the cluster.
+    Type: String
+    Default: 'arn:aws:iam::563295687221:instance-profile/toil-cluster-instance-role'
+  ClusterAvailabilityZone:
+    Description: Name of the availability zone for the toil cluster.
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: 'us-east-1a'
 Conditions:
   PublicEc2Resources: !Or [!Equals [ !Ref VpcSubnet, PublicSubnet ], !Equals [ !Ref VpcSubnet, PublicSubnet1 ], !Equals [ !Ref VpcSubnet, PublicSubnet2 ] ]
   HasKeyName: !Not [!Equals ["", !Ref KeyName]]
@@ -87,6 +111,10 @@ Resources:
             - TagRootVolume
           SetupSsh:
             - WriteSshFiles
+          SetupCluster:
+            - LaunchCluster
+          UpdateCluster:
+            - ReloadCluster
         configure_cfn:
           files:
             /etc/cfn/cfn-hup.conf:
@@ -104,7 +132,7 @@ Resources:
                 [cfn-auto-reloader-hook]
                 triggers=post.update
                 path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh --region ${AWS::Region}
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,UpdateCluster --region ${AWS::Region}
               mode: "000400"
               owner: root
               group: root
@@ -151,16 +179,82 @@ Resources:
                 OWNER_EMAIL: !Ref OwnerEmail
         WriteSshFiles:
           files:
-            /home/ubuntu/.ssh/id_rsa:
+            /root/.ssh/id_rsa:
               content: !Ref RsaKey
               mode: "000400"
-              owner: "ubuntu"
-              group: "ubuntu"
-            /home/ubuntu/.ssh/id_rsa.pub:
+              owner: "root"
+              group: "root"
+            /root/.ssh/id_rsa.pub:
               content: !Ref PublicRsaKey
               mode: "000644"
-              owner: "ubuntu"
-              group: "ubuntu"
+              owner: "root"
+              group: "root"
+        LaunchCluster:
+          files:
+            /lib/systemd/system/toil-cluster.service:
+              content: |
+                [Unit]
+                Description=Cluster launch/destroy scripts
+                After=network.target nss-lookup.target
+                Wants=network.target nss-lookup.target
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/bash /opt/toil/bin/create-toil-cluster.sh
+                ExecStop=/bin/bash /opt/toil/bin/remove-toil-cluster.sh
+                ExecReload=/bin/bash /opt/toil/bin/reload-toil-cluster.sh
+                RemainAfterExit=true
+
+                [Install]
+                WantedBy=multi-user.target
+              mode: "000644"
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/create-toil-cluster.sh:
+              content: !Sub
+                - |
+                  TOIL_APPLIANCE_SELF=${ToilAppliance} && \
+                  /usr/local/bin/toil launch-cluster ${ClusterName} \
+                  --leaderNodeType ${ClusterLeaderNodeType} \
+                  --leaderStorage ${ClusterLeaderStorage} \
+                  --zone ${ClusterAvailabilityZone} \
+                  --keyPairName ${KeyName} \
+                  --vpcSubnet ${VpcSubnetId} \
+                  --awsEc2ProfileArn ${ToilInstanceRoleName} \
+                  --tag Department=${Department} \
+                  --tag Name=${ClusterName} \
+                  --tag OwnerEmail=${OwnerEmail} \
+                  --tag Project=${Project} \
+                  --tag parkmycloud=yes \
+                  --logDebug
+                - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
+              mode: "00644"
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/remove-toil-cluster.sh:
+              content: !Sub |
+                /usr/local/bin/toil destroy-cluster \
+                  --zone ${ClusterAvailabilityZone} \
+                  ${ClusterName}
+              mode: "00644"
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/reload-toil-cluster.sh:
+              content: |
+                /opt/toil/bin/remove-toil-cluster.sh
+                /opt/toil/bin/create-toil-cluster.sh
+              mode: "00644"
+              owner: "root"
+              group: "root"
+          commands:
+            01_enable_toil-cluster-service:
+              command: "/bin/systemctl enable toil-cluster.service"
+            02_start_toil-cluster-service:
+              command: "/bin/systemctl start toil-cluster.service"
+        ReloadCluster:
+          commands:
+            01_reload_toil-cluster-service:
+              command: "/bin/systemctl reload toil-cluster.service"
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
@@ -185,11 +279,16 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
+          export DEBIAN_FRONTEND=noninteractive
+          /usr/bin/apt-get -y update
+          /usr/bin/apt-get -y upgrade
           /usr/bin/apt-get install -y python-pip
           /usr/bin/apt-get install -y python-setuptools
-          /bin/mkdir -p /opt/aws/bin
+          /usr/bin/apt-get install -y python3-pip
+          /bin/mkdir -p /opt/aws/bin /opt/toil/bin
           /usr/bin/python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh --region ${AWS::Region}
+          /usr/bin/pip3 install toil[cwl,aws]
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,SetupCluster --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ec2Instance --region ${AWS::Region}
       Tags:
         - Key: "parkmycloud"
