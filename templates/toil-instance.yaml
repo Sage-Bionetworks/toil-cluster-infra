@@ -112,6 +112,8 @@ Resources:
             - WriteSshFiles
           SetupCluster:
             - LaunchCluster
+          UpdateCluster:
+            - ReloadCluster
         configure_cfn:
           files:
             /etc/cfn/cfn-hup.conf:
@@ -129,7 +131,7 @@ Resources:
                 [cfn-auto-reloader-hook]
                 triggers=post.update
                 path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh --region ${AWS::Region}
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,UpdateCluster --region ${AWS::Region}
               mode: "000400"
               owner: root
               group: root
@@ -199,6 +201,7 @@ Resources:
                 Type=oneshot
                 ExecStart=/bin/bash /home/ubuntu/create-toil-cluster.sh
                 ExecStop=/bin/bash /home/ubuntu/remove-toil-cluster.sh
+                ExecReload=/bin/bash /home/ubuntu/reload-toil-cluster.sh
                 RemainAfterExit=true
 
                 [Install]
@@ -235,11 +238,19 @@ Resources:
               mode: "00644"
               owner: "ubuntu"
               group: "ubuntu"
+            /home/ubuntu/reload-toil-cluster.sh:
+              content: |
+                /home/ubuntu/remove-toil-cluster.sh
+                /home/ubuntu/create-toil-cluster.sh
           commands:
             01_enable_toil-cluster-service:
               command: "/bin/systemctl enable toil-cluster.service"
             02_start_toil-cluster-service:
               command: "/bin/systemctl start toil-cluster.service"
+        ReloadCluster:
+          commands:
+            01_reload_toil-cluster-service:
+              command: "/bin/systemctl reload toil-cluster.service"
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
