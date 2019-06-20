@@ -75,7 +75,7 @@ Parameters:
   ToilAppliance:
     Description: Docker image to use for the toil instances.
     Type: String
-    Default: 'quay.io/tessthyer/amp-rnaseq_reprocess:toil-3.20.0'
+    Default: 'quay.io/tessthyer/toil-appliance:f3cb3b0'
   ClusterName:
     Description: Name of the cluster, will be applied to all instances associated with it.
     Type: String
@@ -213,7 +213,8 @@ Resources:
             /opt/toil/bin/create-toil-cluster.sh:
               content: !Sub
                 - |
-                  TOIL_APPLIANCE_SELF=${ToilAppliance} && \
+                  export TOIL_APPLIANCE_SELF=${ToilAppliance} && \
+                  /bin/echo "Launching cluster with appliance $TOIL_APPLIANCE_SELF" && \
                   /usr/local/bin/toil launch-cluster ${ClusterName} \
                   --leaderNodeType ${ClusterLeaderNodeType} \
                   --leaderStorage ${ClusterLeaderStorage} \
@@ -284,10 +285,9 @@ Resources:
           /usr/bin/apt-get -y upgrade
           /usr/bin/apt-get install -y python-pip
           /usr/bin/apt-get install -y python-setuptools
-          /usr/bin/apt-get install -y python3-pip
           /bin/mkdir -p /opt/aws/bin /opt/toil/bin
           /usr/bin/python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          /usr/bin/pip3 install toil[cwl,aws]
+          /usr/bin/pip install toil[cwl,aws]
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,SetupCluster --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ec2Instance --region ${AWS::Region}
       Tags:
