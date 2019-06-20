@@ -87,6 +87,7 @@ Parameters:
     Description: Amount of disk in Gigabytes to reserve for the cluster leader.
     Type: Number
     Default: 100
+    MinValue: 50
   ToilInstanceRoleName:
     Description: The role that will be passed to the leader when the jumpbox creates the cluster.
     Type: String
