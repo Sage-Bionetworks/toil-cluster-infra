@@ -199,9 +199,9 @@ Resources:
 
                 [Service]
                 Type=oneshot
-                ExecStart=/bin/bash /home/ubuntu/create-toil-cluster.sh
-                ExecStop=/bin/bash /home/ubuntu/remove-toil-cluster.sh
-                ExecReload=/bin/bash /home/ubuntu/reload-toil-cluster.sh
+                ExecStart=/bin/bash /opt/toil/bin/create-toil-cluster.sh
+                ExecStop=/bin/bash /opt/toil/bin/remove-toil-cluster.sh
+                ExecReload=/bin/bash /opt/toil/bin/reload-toil-cluster.sh
                 RemainAfterExit=true
 
                 [Install]
@@ -209,7 +209,7 @@ Resources:
               mode: "000644"
               owner: "root"
               group: "root"
-            /home/ubuntu/create-toil-cluster.sh:
+            /opt/toil/bin/create-toil-cluster.sh:
               content: !Sub
                 - |
                   TOIL_APPLIANCE_SELF=${ToilAppliance} && \
@@ -228,20 +228,23 @@ Resources:
                   --logDebug
                 - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
               mode: "00644"
-              owner: "ubuntu"
-              group: "ubuntu"
-            /home/ubuntu/remove-toil-cluster.sh:
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/remove-toil-cluster.sh:
               content: !Sub |
                 /usr/local/bin/toil destroy-cluster \
                   --zone ${ClusterAvailabilityZone} \
                   ${ClusterName}
               mode: "00644"
-              owner: "ubuntu"
-              group: "ubuntu"
-            /home/ubuntu/reload-toil-cluster.sh:
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/reload-toil-cluster.sh:
               content: |
-                /home/ubuntu/remove-toil-cluster.sh
-                /home/ubuntu/create-toil-cluster.sh
+                /opt/toil/bin/remove-toil-cluster.sh
+                /opt/toil/bin/create-toil-cluster.sh
+              mode: "00644"
+              owner: "root"
+              group: "root"
           commands:
             01_enable_toil-cluster-service:
               command: "/bin/systemctl enable toil-cluster.service"
@@ -281,7 +284,7 @@ Resources:
           /usr/bin/apt-get install -y python-pip
           /usr/bin/apt-get install -y python-setuptools
           /usr/bin/apt-get install -y python3-pip
-          /bin/mkdir -p /opt/aws/bin
+          /bin/mkdir -p /opt/aws/bin /opt/toil/bin
           /usr/bin/python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
           /usr/bin/pip3 install toil[cwl,aws]
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,SetupCluster --region ${AWS::Region}
