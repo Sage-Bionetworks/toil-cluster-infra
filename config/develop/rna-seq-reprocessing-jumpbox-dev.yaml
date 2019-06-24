@@ -12,7 +12,7 @@ parameters:
   VpcName: "sandcastlevpc"
   KeyName: "{{stack_group_config.toil_key_pair}}"
   AMIId: "{{stack_group_config.toil_ami}}"
-  RoleStackName: "rna-seq-reprocessing-instance-role-v001"
+  RoleStackName: "rna-seq-reprocessing-role-dev"
 
   RsaKey: !ssm /toil-cluster-infra/SshKey
   PublicRsaKey: !ssm /toil-cluster-infra/PublicSshKey
