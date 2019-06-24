@@ -1,0 +1,33 @@
+# Provision an EC2 instance
+template_path: toil-instance.yaml
+stack_name: rna-seq-reprocessing-jumpbox-dev
+parameters:
+  # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
+  Department: "SysBio"
+  # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
+  Project: "amp-ad"
+  # The resource owner
+  OwnerEmail: "tess.thyer@sagebase.org"
+
+  VpcName: "sandcastlevpc"
+  KeyName: "{{stack_group_config.toil_key_pair}}"
+  AMIId: "{{stack_group_config.toil_ami}}"
+  RoleStackName: "rna-seq-reprocessing-instance-role-v001"
+
+  RsaKey: !ssm /toil-cluster-infra/SshKey
+  PublicRsaKey: !ssm /toil-cluster-infra/PublicSshKey
+  ClusterName: rna-seq-reprocessing-cluster-dev
+
+  # Settings have default values but can be overriden. Set the below
+  # parameters *only* if you want to override the defaults.
+
+  # (Optional) EC2 instance type, default is "t2.nano" (other available types https://aws.amazon.com/ec2/pricing/on-demand/)
+  # InstanceType: "t2.medium"
+  # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
+  # VolumeSize: "50"
+  # (Optional) Set true to enable daily backups (default: false)
+
+# For CI system (do not change)
+hooks:
+  after_create:
+    - !ec2_notify "{{stack_group_config.aws_account_name}} {{stack_group_config.aws_account_email}}"
