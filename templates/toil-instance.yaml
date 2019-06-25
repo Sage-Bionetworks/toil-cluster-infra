@@ -129,6 +129,7 @@ Resources:
                 triggers=post.update
                 path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
                 action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,UpdateCluster --region ${AWS::Region}
+                runas=root
               mode: "000400"
               owner: root
               group: root
