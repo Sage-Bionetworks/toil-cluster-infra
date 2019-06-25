@@ -1,4 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
+Conditions:
+  IsSandbox: !Equals [!Ref "AWS::AccountId", "563295687221"]
+  IsScicomp: !Equals [!Ref "AWS::AccountId", "055273631518"]
 Mappings:
   AdminRoleArns:
     "563295687221":
@@ -51,7 +54,7 @@ Resources:
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !ImportValue us-east-1-rna-seq-reprocessing-instance-role-v001-ToilClusterRoleArn
-                - !ImportValue us-east-1-rna-seq-reprocessing-role-dev-ToilClusterRoleArn
+                - !If [IsSandbox, !ImportValue us-east-1-rna-seq-reprocessing-role-dev-ToilClusterRoleArn, !Ref "AWS::NoValue"]
                 - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
             Action:
               - "kms:Encrypt"
