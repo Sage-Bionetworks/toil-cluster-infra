@@ -85,7 +85,9 @@ Resources:
           - Effect: Allow
             Action:
               - sdb:*
-            Resource: !Sub "arn:aws:sdb:${AWS::Region}:${AWS::AccountId}:domain/${ClusterName}*"
+            Resource:
+              - !Sub "arn:aws:sdb:${AWS::Region}:${AWS::AccountId}:domain/${ClusterName}*"
+              - !Sub "arn:aws:sdb:${AWS::Region}:${AWS::AccountId}:domain/toil-registry"
   TagRootVolumePolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
