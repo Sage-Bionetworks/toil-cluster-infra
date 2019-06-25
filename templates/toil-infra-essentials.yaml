@@ -51,6 +51,7 @@ Resources:
                 - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !ImportValue us-east-1-rna-seq-reprocessing-instance-role-v001-ToilClusterRoleArn
+                - !ImportValue us-east-1-rna-seq-reprocessing-role-dev-ToilClusterRoleArn
                 - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
             Action:
               - "kms:Encrypt"
