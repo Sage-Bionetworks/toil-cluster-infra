@@ -88,10 +88,6 @@ Parameters:
     Type: Number
     Default: 100
     MinValue: 50
-  ToilInstanceRoleName:
-    Description: The role that will be passed to the leader when the jumpbox creates the cluster.
-    Type: String
-    Default: 'arn:aws:iam::563295687221:instance-profile/toil-cluster-instance-role'
   ClusterAvailabilityZone:
     Description: Name of the availability zone for the toil cluster.
     Type: AWS::EC2::AvailabilityZone::Name
@@ -221,7 +217,7 @@ Resources:
                   --zone ${ClusterAvailabilityZone} \
                   --keyPairName ${KeyName} \
                   --vpcSubnet ${VpcSubnetId} \
-                  --awsEc2ProfileArn ${ToilInstanceRoleName} \
+                  --awsEc2ProfileArn ${ToilInstanceProfileArn} \
                   --tag Department=${Department} \
                   --tag Name=${ClusterName} \
                   --tag OwnerEmail=${OwnerEmail} \
@@ -229,6 +225,7 @@ Resources:
                   --tag parkmycloud=yes \
                   --logDebug
                 - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
+                  ToilInstanceProfileArn: !ImportValue {'Fn::Sub': '${AWS::Region}-${RoleStackName}-ToilClusterInstanceProfileArn'}
               mode: "00644"
               owner: "root"
               group: "root"
