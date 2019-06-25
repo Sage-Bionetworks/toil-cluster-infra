@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Conditions:
   IsSandbox: !Equals [!Ref "AWS::AccountId", "563295687221"]
-  IsScicomp: !Equals [!Ref "AWS::AccountId", "055273631518"]
 Mappings:
   AdminRoleArns:
     "563295687221":
