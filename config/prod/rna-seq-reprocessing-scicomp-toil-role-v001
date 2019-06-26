@@ -1,4 +1,0 @@
-template_path: toil-cluster-role-and-policy.yaml
-stack_name: rna-seq-reprocessing-scicomp-toil-role-v001
-parameters:
-  ClusterName: rna-seq-reprocessing-scicomp-toil-cluster-v001
