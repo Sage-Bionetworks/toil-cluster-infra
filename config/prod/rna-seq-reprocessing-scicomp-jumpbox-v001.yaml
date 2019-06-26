@@ -1,6 +1,6 @@
 # Provision an EC2 instance
 template_path: toil-instance.yaml
-stack_name: rna-seq-reprocessing-instance-v001
+stack_name: rna-seq-reprocessing-scicomp-jumpbox-v001
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "SysBio"
