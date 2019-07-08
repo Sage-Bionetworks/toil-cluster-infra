@@ -1,0 +1,6 @@
+template_path: toil-resource-group.yaml
+stack_name: rna-seq-reprocessing-resource-group-dev
+parameters:
+  Department: "SysBio"
+  Project: "amp-ad"
+  OwnerEmail: "tess.thyer@sagebase.org"
