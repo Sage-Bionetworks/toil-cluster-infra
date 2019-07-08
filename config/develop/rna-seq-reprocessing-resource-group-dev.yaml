@@ -4,3 +4,4 @@ parameters:
   Department: "SysBio"
   Project: "amp-ad"
   OwnerEmail: "tess.thyer@sagebase.org"
+  ClusterName: "rna-seq-reprocessing-cluster-dev"
