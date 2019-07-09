@@ -1,0 +1,7 @@
+template_path: toil-resource-group.yaml
+stack_name: rna-seq-reprocessing-resource-group-v001
+parameters:
+  Department: "SysBio"
+  Project: "amp-ad"
+  OwnerEmail: "tess.thyer@sagebase.org"
+  ClusterName: "rna-seq-reprocessing-scicomp-toil-cluster-v001"
