@@ -41,7 +41,7 @@ Parameters:
     Description: 'The name of the sub-project that this resource is used for'
     Type: String
     AllowedPattern: '^\S*$'
-    ConstraintDescription: 'Must be string with no spaces'  
+    ConstraintDescription: 'Must be string with no spaces'
   OwnerEmail:
     Description: 'Email address of the owner of this resource'
     Type: String
