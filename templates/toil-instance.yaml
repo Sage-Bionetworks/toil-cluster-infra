@@ -37,6 +37,11 @@ Parameters:
     Type: String
     AllowedPattern: '^\S*$'
     ConstraintDescription: 'Must be string with no spaces'
+  SubProject:
+    Description: 'The name of the sub-project that this resource is used for'
+    Type: String
+    AllowedPattern: '^\S*$'
+    ConstraintDescription: 'Must be string with no spaces'  
   OwnerEmail:
     Description: 'Email address of the owner of this resource'
     Type: String
@@ -223,6 +228,7 @@ Resources:
                   --tag Name=${ClusterName} \
                   --tag OwnerEmail=${OwnerEmail} \
                   --tag Project=${Project} \
+                  --tag SubProject=${SubProject} \
                   --tag parkmycloud=yes \
                   --logDebug
                 - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
