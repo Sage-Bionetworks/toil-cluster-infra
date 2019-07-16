@@ -253,7 +253,7 @@ Resources:
               owner: "root"
               group: "root"
             /opt/toil/bin/add-security-group.py:
-              content: !Sub 
+              content: !Sub
                 - |
                   #! /usr/bin/env python
 
@@ -302,7 +302,7 @@ Resources:
                   print('\ngroup_ids: %s' % ' '.join(group_ids))
 
                   new_security_group = "${VPCSecurityGroup}"
-                 
+
                   if(new_security_group in group_ids):
                     print('Desired security group already associated with leader.')
                   else:
