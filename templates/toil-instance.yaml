@@ -230,7 +230,8 @@ Resources:
                   --tag Project=${Project} \
                   --tag SubProject=${SubProject} \
                   --tag parkmycloud=yes \
-                  --logDebug
+                  --logDebug && \
+                  /usr/bin/python /opt/toil/bin/add-security-group.py
                 - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
                   ToilInstanceProfileArn: !ImportValue {'Fn::Sub': '${AWS::Region}-${RoleStackName}-ToilClusterInstanceProfileArn'}
               mode: "00644"
@@ -246,8 +247,76 @@ Resources:
               group: "root"
             /opt/toil/bin/reload-toil-cluster.sh:
               content: |
-                /opt/toil/bin/remove-toil-cluster.sh
-                /opt/toil/bin/create-toil-cluster.sh
+                /bin/bash /opt/toil/bin/remove-toil-cluster.sh
+                /bin/bash /opt/toil/bin/create-toil-cluster.sh
+              mode: "00644"
+              owner: "root"
+              group: "root"
+            /opt/toil/bin/add-security-group.py:
+              content: !Sub 
+                - |
+                  #! /usr/bin/env python
+
+                  import boto3
+
+                  region = 'us-east-1'
+                  client = boto3.client('ec2', region_name=region)
+
+                  print('Ensure vpc security group is associated with leader node.')
+
+                  print('\nSending describe instances request')
+                  describe_instances_response = client.describe_instances(
+                    Filters=[
+                      {
+                          'Name': 'tag:Name',
+                          'Values': [
+                              "${ClusterName}",
+                          ]
+                      }
+                    ])
+
+                  print('Describe instances response:'')
+                  print(describe_instances_response)
+
+                  instance_ids = [
+                    instance.get('InstanceId')
+                    for reservation in describe_instances_response.get('Reservations')
+                    for instance in reservation.get('Instances') if instance.get('State').get('Name') != 'terminated'
+                  ]
+
+                  print('\nList of instance ids:')
+                  print(' '.join(instance_ids))
+                  assert len(instance_ids) == 1
+                  instance_id = instance_ids[0]
+                  print('\n\ninstance_id: %s' % instance_id)
+
+                  print('\n\Sending instance groups request')
+                  groups_response = client.describe_instance_attribute(
+                    InstanceId=instance_id,
+                    Attribute='groupSet'
+                    )
+                  print('Groups response:'')
+                  print(groups_response)
+
+                  group_ids = [group['GroupId'] for group in groups_response['Groups']]
+                  print('\ngroup_ids: %s' % ' '.join(group_ids))
+
+                  new_security_group = "${VPCSecurityGroup}"
+                 
+                  if(new_security_group in group_ids):
+                    print('Desired security group already associated with leader.')
+                  else:
+                    group_ids.append(new_security_group)
+
+                    print('Sending modify groups request')
+                    modify_groups_response = client.modify_instance_attribute(
+                      InstanceId=instance_id,
+                      Groups=group_ids
+                      )
+
+                    print('Modify groups response:'')
+                    print(modify_groups_response)
+                - VPCSecurityGroup: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-VpnSecurityGroup'}
               mode: "00644"
               owner: "root"
               group: "root"
