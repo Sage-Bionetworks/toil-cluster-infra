@@ -1,4 +1,4 @@
 template_path: toil-infra-essentials.yaml
 stack_name: toil-infra-essentials
 dependencies:
-  - dev/rna-seq-reprocessing-instance-role-v001.yaml
+  - develop/rna-seq-reprocessing-instance-role-v001.yaml
