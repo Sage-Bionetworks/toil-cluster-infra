@@ -26,7 +26,6 @@ Resources:
                   - - 'arn:aws:iam::'
                     - !Ref AWS::AccountId
                     - ':root'
-                - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
             Action:
@@ -48,7 +47,6 @@ Resources:
             Effect: "Allow"
             Principal:
               AWS:
-                - !ImportValue us-east-1-bootstrap-TravisUserArn
                 - !ImportValue us-east-1-bootstrap-CfServiceRoleArn
                 - !ImportValue us-east-1-rna-seq-reprocessing-instance-role-v001-ToilClusterRoleArn
                 - !FindInMap [AdminRoleArns, !Ref "AWS::AccountId", Arn]
