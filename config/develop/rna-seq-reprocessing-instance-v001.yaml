@@ -1,6 +1,9 @@
 # Provision an EC2 instance
 template_path: toil-instance.yaml
 stack_name: rna-seq-reprocessing-instance-v001
+dependencies:
+  - develop/toil-infra-essentials.yaml
+  - develop/rna-seq-reprocessing-instance-role-v001.yaml
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "SysBio"
