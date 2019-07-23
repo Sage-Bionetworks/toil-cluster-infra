@@ -259,7 +259,7 @@ Resources:
 
                   import boto3
 
-                  region = 'us-east-1'
+                  region = "${AWS::Region}"
                   client = boto3.client('ec2', region_name=region)
 
                   print('Ensure vpc security group is associated with leader node.')
