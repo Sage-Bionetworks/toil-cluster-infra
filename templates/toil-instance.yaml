@@ -262,7 +262,7 @@ Resources:
                   region = "${AWS::Region}"
                   client = boto3.client('ec2', region_name=region)
 
-                  print('Ensure vpc security group is associated with leader node.')
+                  print('Ensure vpn security group is associated with leader node.')
 
                   print('\nSending describe instances request')
                   describe_instances_response = client.describe_instances(
@@ -301,7 +301,7 @@ Resources:
                   group_ids = [group['GroupId'] for group in groups_response['Groups']]
                   print('\ngroup_ids: %s' % ' '.join(group_ids))
 
-                  new_security_group = "${VPCSecurityGroup}"
+                  new_security_group = "${VPNSecurityGroup}"
 
                   if(new_security_group in group_ids):
                     print('Desired security group already associated with leader.')
@@ -316,7 +316,7 @@ Resources:
 
                     print('Modify groups response:'')
                     print(modify_groups_response)
-                - VPCSecurityGroup: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-VpnSecurityGroup'}
+                - VPNSecurityGroup: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-VpnSecurityGroup'}
               mode: "00644"
               owner: "root"
               group: "root"
