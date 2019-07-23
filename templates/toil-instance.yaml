@@ -269,9 +269,11 @@ Resources:
                     Filters=[
                       {
                           'Name': 'tag:Name',
-                          'Values': [
-                              "${ClusterName}",
-                          ]
+                          'Values': ["${ClusterName}"]
+                      },
+                      {
+                          'Name': 'tag:ToilNodeType',
+                          'Values': ['leader']
                       }
                     ])
 
