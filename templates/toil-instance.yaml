@@ -277,7 +277,7 @@ Resources:
                       }
                     ])
 
-                  print('Describe instances response:'')
+                  print('Describe instances response:')
                   print(describe_instances_response)
 
                   instance_ids = [
@@ -297,7 +297,7 @@ Resources:
                     InstanceId=instance_id,
                     Attribute='groupSet'
                     )
-                  print('Groups response:'')
+                  print('Groups response:')
                   print(groups_response)
 
                   group_ids = [group['GroupId'] for group in groups_response['Groups']]
@@ -316,7 +316,7 @@ Resources:
                       Groups=group_ids
                       )
 
-                    print('Modify groups response:'')
+                    print('Modify groups response:')
                     print(modify_groups_response)
                 - VPNSecurityGroup: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-VpnSecurityGroup'}
               mode: "00644"
