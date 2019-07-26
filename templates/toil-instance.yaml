@@ -113,9 +113,7 @@ Resources:
           SetupSsh:
             - WriteSshFiles
           SetupCluster:
-            - LaunchCluster
-          UpdateCluster:
-            - ReloadCluster
+            - ClusterService
         configure_cfn:
           files:
             /etc/cfn/cfn-hup.conf:
@@ -133,7 +131,7 @@ Resources:
                 [cfn-auto-reloader-hook]
                 triggers=post.update
                 path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,UpdateCluster --region ${AWS::Region}
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance --configsets SetupCfn,SetupVolume,SetupSsh,SetupCluster --region ${AWS::Region}
                 runas=root
               mode: "000400"
               owner: root
@@ -191,75 +189,163 @@ Resources:
               mode: "000644"
               owner: "root"
               group: "root"
-        LaunchCluster:
+        ClusterService:
           files:
-            /lib/systemd/system/toil-cluster.service:
-              content: |
-                [Unit]
-                Description=Cluster launch/destroy scripts
-                After=network.target nss-lookup.target
-                Wants=network.target nss-lookup.target
-
-                [Service]
-                Type=oneshot
-                ExecStart=/bin/bash /opt/toil/bin/create-toil-cluster.sh
-                ExecStop=/bin/bash /opt/toil/bin/remove-toil-cluster.sh
-                ExecReload=/bin/bash /opt/toil/bin/reload-toil-cluster.sh
-                RemainAfterExit=true
-
-                [Install]
-                WantedBy=multi-user.target
-              mode: "000644"
-              owner: "root"
-              group: "root"
-            /opt/toil/bin/create-toil-cluster.sh:
+            /etc/init.d/toil-cluster-service:
               content: !Sub
                 - |
-                  export TOIL_APPLIANCE_SELF=${ToilAppliance} && \
-                  /bin/echo "Launching cluster with appliance $TOIL_APPLIANCE_SELF" && \
-                  /usr/local/bin/toil launch-cluster ${ClusterName} \
-                  --leaderNodeType ${ClusterLeaderNodeType} \
-                  --leaderStorage ${ClusterLeaderStorage} \
-                  --zone ${ClusterAvailabilityZone} \
-                  --keyPairName ${KeyName} \
-                  --vpcSubnet ${VpcSubnetId} \
-                  --awsEc2ProfileArn ${ToilInstanceProfileArn} \
-                  --tag Department=${Department} \
-                  --tag Name=${ClusterName} \
-                  --tag OwnerEmail=${OwnerEmail} \
-                  --tag Project=${Project} \
-                  --tag SubProject=${SubProject} \
-                  --tag parkmycloud=yes \
-                  --logDebug
+                  #! /bin/bash
+
+                  ### BEGIN INIT INFO
+                  # Provides:          a toil cluster
+                  # Required-Start:    $local_fs $network
+                  # Required-Stop:     $local_fs
+                  # Default-Start:     2 3 4 5
+                  # Default-Stop:      0 1 6
+                  # Short-Description: toil-cluster-management
+                  # Description:       Run a toil cluster management service
+                  ### END INIT INFO
+
+                  prog='toil cluster service'
+
+                  start() {
+                    export TOIL_APPLIANCE_SELF=${ToilAppliance} && \
+                    /bin/echo "Launching cluster with appliance $TOIL_APPLIANCE_SELF" && \
+                    /usr/local/bin/toil launch-cluster ${ClusterName} \
+                    --leaderNodeType ${LeaderNodeType} \
+                    --leaderStorage ${ClusterLeaderStorage} \
+                    --zone ${ClusterAvailabilityZone} \
+                    --keyPairName ${KeyName} \
+                    --vpcSubnet ${VpcSubnetId} \
+                    --awsEc2ProfileArn ${ToilInstanceProfileArn} \
+                    --tag Department=${Department} \
+                    --tag Name=${ClusterName} \
+                    --tag OwnerEmail=${OwnerEmail} \
+                    --tag Project=${Project} \
+                    --tag SubProject=${SubProject} \
+                    --tag parkmycloud=yes \
+                    --logDebug && \
+                    /usr/bin/python /opt/toil/bin/add-security-group.py
+                  }
+
+                  stop() {
+                    /usr/local/bin/toil destroy-cluster --zone ${ClusterAvailabilityZone} ${ClusterName}
+                  }
+
+                  status() {
+                    echo 'cluster status not implemented'
+                  }
+
+                  case "$1" in
+                    start)
+                    start
+                    ;;
+                    stop)
+                    stop
+                    ;;
+                    status|fullstatus)
+                    status
+                    ;;
+                    restart|reload)
+                    stop
+                    start
+                    ;;
+                    *)
+                    echo $"Usage: $prog {start|stop|restart|reload|status|fullstatus}"
+                    exit 1
+                  esac
+
+                  exit 0
+
                 - VpcSubnetId: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-${VpcSubnet}'}
                   ToilInstanceProfileArn: !ImportValue {'Fn::Sub': '${AWS::Region}-${RoleStackName}-ToilClusterInstanceProfileArn'}
-              mode: "00644"
+                  LeaderNodeType: !Ref ClusterLeaderNodeType
+              mode: "00755"
               owner: "root"
               group: "root"
-            /opt/toil/bin/remove-toil-cluster.sh:
-              content: !Sub |
-                /usr/local/bin/toil destroy-cluster \
-                  --zone ${ClusterAvailabilityZone} \
-                  ${ClusterName}
-              mode: "00644"
-              owner: "root"
-              group: "root"
-            /opt/toil/bin/reload-toil-cluster.sh:
-              content: |
-                /opt/toil/bin/remove-toil-cluster.sh
-                /opt/toil/bin/create-toil-cluster.sh
+            /opt/toil/bin/add-security-group.py:
+              content: !Sub
+                - |
+                  #! /usr/bin/env python
+
+                  import boto3
+
+                  region = "${AWS::Region}"
+                  client = boto3.client('ec2', region_name=region)
+
+                  print('Ensure vpn security group is associated with leader node.')
+
+                  print('\nSending describe instances request')
+                  describe_instances_response = client.describe_instances(
+                    Filters=[
+                      {
+                          'Name': 'tag:Name',
+                          'Values': ["${ClusterName}"]
+                      },
+                      {
+                          'Name': 'tag:ToilNodeType',
+                          'Values': ['leader']
+                      }
+                    ])
+
+                  print('Describe instances response:')
+                  print(describe_instances_response)
+
+                  instance_ids = [
+                    instance.get('InstanceId')
+                    for reservation in describe_instances_response.get('Reservations')
+                    for instance in reservation.get('Instances') if instance.get('State').get('Name') != 'terminated'
+                  ]
+
+                  print('\nList of instance ids:')
+                  print(' '.join(instance_ids))
+                  assert len(instance_ids) == 1
+                  instance_id = instance_ids[0]
+                  print('\n\ninstance_id: %s' % instance_id)
+
+                  print('\n\Sending instance groups request')
+                  groups_response = client.describe_instance_attribute(
+                    InstanceId=instance_id,
+                    Attribute='groupSet'
+                    )
+                  print('Groups response:')
+                  print(groups_response)
+
+                  group_ids = [group['GroupId'] for group in groups_response['Groups']]
+                  print('\ngroup_ids: %s' % ' '.join(group_ids))
+
+                  new_security_group = "${VPNSecurityGroup}"
+
+                  if(new_security_group in group_ids):
+                    print('Desired security group already associated with leader.')
+                  else:
+                    group_ids.append(new_security_group)
+
+                    print('Sending modify groups request')
+                    modify_groups_response = client.modify_instance_attribute(
+                      InstanceId=instance_id,
+                      Groups=group_ids
+                      )
+
+                    print('Modify groups response:')
+                    print(modify_groups_response)
+                - VPNSecurityGroup: !ImportValue {'Fn::Sub': '${AWS::Region}-${VpcName}-VpnSecurityGroup'}
               mode: "00644"
               owner: "root"
               group: "root"
           commands:
-            01_enable_toil-cluster-service:
-              command: "/bin/systemctl enable toil-cluster.service"
-            02_start_toil-cluster-service:
-              command: "/bin/systemctl start toil-cluster.service"
-        ReloadCluster:
-          commands:
-            01_reload_toil-cluster-service:
-              command: "/bin/systemctl reload toil-cluster.service"
+            # toil-cluster-service is a SysV service, and these require setting run-levels
+            # see http://manpages.ubuntu.com/manpages/bionic/man8/update-rc.d.8.html
+            01_add_toil-cluster-service_run-levels:
+              command: "sudo /usr/sbin/update-rc.d toil-cluster-service defaults"
+          services:
+            sysvinit:
+              toil-cluster-service:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/etc/init.d/toil-cluster-service"
+                  - "/opt/toil/bin/add-security-group.py"
     Properties:
       ImageId: !Ref AMIId
       InstanceType: !Ref InstanceType
