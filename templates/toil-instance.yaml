@@ -334,7 +334,9 @@ Resources:
               owner: "root"
               group: "root"
           commands:
-            01_update-rc.d_toil-cluster-service:
+            # toil-cluster-service is a SysV service, and these require setting run-levels
+            # see http://manpages.ubuntu.com/manpages/bionic/man8/update-rc.d.8.html
+            01_add_toil-cluster-service_run-levels:
               command: "sudo /usr/sbin/update-rc.d toil-cluster-service defaults"
           services:
             sysvinit:
