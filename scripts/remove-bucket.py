@@ -42,7 +42,11 @@ while repeat_list:
                 }
             )
             print('Number object versions deleted from bucket: {}'.format(len(delete_objects_response.get('Deleted',[]))))
-            print('Delete versions errors: {}'.format(delete_objects_response.get('Errors',[])))
+            errors = delete_objects_response.get('Errors', [])
+            if errors:
+                print('Delete versions errors: {}'.format(errors))
+                sys.exit(1)
+
 delete_bucket_response = client.delete_bucket(Bucket=bucket_name)
 print('\nDELETE BUCKET RESPONSE')
 print(delete_bucket_response)
