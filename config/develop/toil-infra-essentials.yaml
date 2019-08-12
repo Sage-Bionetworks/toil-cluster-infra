@@ -1,2 +1,11 @@
 template_path: toil-infra-essentials.yaml
 stack_name: toil-infra-essentials
+parameters:
+  # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
+  Department: "SysBio"
+  # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
+  Project: "amp-ad"
+  # A sub-project
+  SubProject: "amp-ad-workflows"
+  # The resource owner
+  OwnerEmail: "tess.thyer@sagebase.org"
