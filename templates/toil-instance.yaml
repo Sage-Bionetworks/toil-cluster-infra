@@ -389,6 +389,8 @@ Resources:
           Value: !Ref Department
         - Key: "Project"
           Value: !Ref Project
+        - Key: "SubProject"
+          Value: !Ref SubProject
         - Key: "OwnerEmail"
           Value: !Ref OwnerEmail
     CreationPolicy:
