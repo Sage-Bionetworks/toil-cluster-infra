@@ -1,6 +1,8 @@
 # Provision a Synapse External Bucket (http://docs.synapse.org/articles/custom_storage_location.html)
 template_path: remote/s3-bucket.yaml
 stack_name: rna-seq-reprocessing-toil-cluster-v001-out
+dependencies:
+  - develop/rna-seq-reprocessing-instance-role-v001.yaml
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "SysBio"
@@ -21,6 +23,7 @@ parameters:
     - 'arn:aws:iam::325565585839:root'   # Required ARN for a synapse bucket
     - 'arn:aws:iam::563295687221:user/tess.thyer@sagebase.org'
     - 'arn:aws:iam::563295687221:user/william.poehlman@sagebase.org'
+    - 'arn:aws:iam::563295687221:role/rna-seq-reprocessing-instance-role-v00-ClusterRole-1QAEKIKZY9I2L'
 
   # Restrict downloading files from this bucket to only AWS resources (e.g. EC2 , Lambda)
   # within the same region as this bucket.  This will not allow even the owner of the bucket
