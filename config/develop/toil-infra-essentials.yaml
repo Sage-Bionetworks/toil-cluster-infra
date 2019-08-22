@@ -9,3 +9,4 @@ parameters:
   SubProject: "amp-ad-workflows"
   # The resource owner
   OwnerEmail: "tess.thyer@sagebase.org"
+  ToilClusterRoleArn: "arn:aws:iam::563295687221:role/rna-seq-reprocessing-instance-role-v00-ClusterRole-1QAEKIKZY9I2L"

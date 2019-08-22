@@ -105,3 +105,6 @@ venv.bak/
 
 # jetbrains
 .idea/
+
+# sceptre keeps trying to pull this in, so ignore it
+templates/remote
