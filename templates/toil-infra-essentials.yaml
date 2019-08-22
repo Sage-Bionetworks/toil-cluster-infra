@@ -25,7 +25,6 @@ Parameters:
     Type: String
     Default: ""
 Conditions:
-  IsSandbox: !Equals [!Ref "AWS::AccountId", "563295687221"]
   HasToilClusterRoleArn: !Not [!Equals [!Ref ToilClusterRoleArn, ""]]
 Mappings:
   AdminRoleArns:
