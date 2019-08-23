@@ -22,7 +22,7 @@ parameters:
   RsaKey: !ssm /toil-cluster-infra/SshKey
   PublicRsaKey: !ssm /toil-cluster-infra/PublicSshKey
   ClusterName: rna-seq-reprocessing-toil-cluster-v001
-  ToilAppliance: quay.io/ucsc_cgl/toil:3.20.0-cf34ca3416697f2abc816b2538f20ee29ba16932
+  ToilAppliance: quay.io/tessthyer/toil:3.21.0a1-e33659ee03212db3378dfed80b43362038fd21f3
   ClusterLeaderNodeType: m5.large
 
   # Settings have default values but can be overriden. Set the below
