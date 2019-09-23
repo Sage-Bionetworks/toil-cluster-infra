@@ -1,11 +1,15 @@
 #! /usr/bin/env python3
 
+"""Capacity reservation management
+
+Create or cancel AWS EC2 capacity reservations.
+"""
 import argparse
 import boto3
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parent_parser = argparse.ArgumentParser(add_help=False)
     parent_parser.add_argument(
         '--aws-profile',
@@ -49,8 +53,8 @@ def parse_args():
     return parser.parse_args()
 
 
-# Create a reservation for on-demand AWS EC2 instances
 def create_reservation(client, instance_type, zone, count, dry_run):
+    """Create a reservation for on-demand AWS EC2 instances"""
     print(
         'Creating reservation for {} {} in {}'
         .format(count, instance_type, zone))
@@ -65,6 +69,7 @@ def create_reservation(client, instance_type, zone, count, dry_run):
 
 
 def cancel_reservation(client, reservation_id, dry_run):
+    """Cancel a reservation with a reservation id"""
     print('Canceling reservation {}'.format(reservation_id))
     response = client.cancel_capacity_reservation(
         CapacityReservationId=reservation_id,

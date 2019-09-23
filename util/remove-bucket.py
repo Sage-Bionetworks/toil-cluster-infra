@@ -1,5 +1,10 @@
 #! /usr/bin/env python3
 
+"""S3 Bucket Removal
+
+Empties and deletes an AWS S3 bucket.
+"""
+
 import argparse
 import boto3
 import sys
@@ -7,7 +12,7 @@ import sys
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Empties and deletes a bucket')
+        description=__doc__)
     parser.add_argument(
         'bucket_name',
         help='The name of the bucket to remove')
@@ -21,8 +26,8 @@ def parse_args():
     return parser.parse_args()
 
 
-# Prompt the user to verify that the bucket should be deleted
 def verify_bucket(bucket_name):
+    """Prompts the user to verify that the bucket should be deleted"""
     verify = input(
         'Please confirm that you want to remove bucket {} (y/n)'
         .format(bucket_name))
@@ -31,8 +36,9 @@ def verify_bucket(bucket_name):
         sys.exit(1)
 
 
-# S3 requires that we empty a bucket of all object versions before deleting it
 def empty_bucket(session, bucket_name):
+    """Empties an S3 bucket of all versions, which is required
+    before the bucket may be deleted"""
     client = session.client('s3')
 
     repeat_list = True
@@ -73,6 +79,7 @@ def empty_bucket(session, bucket_name):
 
 
 def delete_bucket(session, bucket_name):
+    """Deletes an empty S3 bucket"""
     client = session.client('s3')
 
     delete_bucket_response = client.delete_bucket(Bucket=bucket_name)
