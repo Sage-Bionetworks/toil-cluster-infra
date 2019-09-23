@@ -6,6 +6,7 @@ Create or cancel AWS EC2 capacity reservations.
 """
 import argparse
 import boto3
+import json
 
 
 def parse_args():
@@ -40,6 +41,10 @@ def parse_args():
         required=True,
         type=int,
         help='Number of instances to reserve')
+    create_parser.add_argument(
+        '--tags',
+        required=True,
+        help='Path to tag specification json')
 
     # Cancel Command
     cancel_parser = subparsers.add_parser(
@@ -53,16 +58,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def create_reservation(client, instance_type, zone, count, dry_run):
+def create_reservation(client, instance_type, zone, count, tag_path, dry_run):
     """Create a reservation for on-demand AWS EC2 instances"""
     print(
         'Creating reservation for {} {} in {}'
         .format(count, instance_type, zone))
+    with open(tag_path) as json_file:
+        tags = json.load(json_file)
+    print(tags)
     response = client.create_capacity_reservation(
         InstancePlatform='Linux/UNIX',
         InstanceType=instance_type,
         AvailabilityZone=zone,
         InstanceCount=count,
+        TagSpecifications=tags,
         DryRun=dry_run
     )
     print(response)
@@ -91,6 +100,7 @@ def main():
             args.instance_type,
             args.zone,
             args.count,
+            args.tags,
             args.dry_run)
     elif args.command == 'cancel':
         cancel_reservation(
