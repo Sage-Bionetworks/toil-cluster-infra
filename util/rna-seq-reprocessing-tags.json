@@ -1,19 +1,14 @@
 [
   {
-    "ResourceType": "capacity-reservation",
-    "Tags": [
-      {
-        "Key": "OwnerEmail",
-        "Value": "tess.thyer@sagebase.org"
-      },
-      {
-        "Key": "Department",
-        "Value": "SysBio"
-      },
-      {
-        "Key": "Project",
-        "Value": "amp-ad/amp-ad-workflows"
-      }
-    ]
+    "Key": "OwnerEmail",
+    "Value": "tess.thyer@sagebase.org"
+  },
+  {
+    "Key": "Department",
+    "Value": "SysBio"
+  },
+  {
+    "Key": "Project",
+    "Value": "amp-ad/amp-ad-workflows"
   }
 ]

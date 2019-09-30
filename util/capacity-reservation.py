@@ -7,6 +7,7 @@ Create or cancel AWS EC2 capacity reservations.
 import argparse
 import boto3
 import json
+import sys
 
 
 def parse_args():
@@ -41,10 +42,13 @@ def parse_args():
         required=True,
         type=int,
         help='Number of instances to reserve')
-    create_parser.add_argument(
+    tag_group = create_parser.add_mutually_exclusive_group(required=True)
+    tag_group.add_argument(
         '--tags',
-        required=True,
         help='Path to tag specification json')
+    tag_group.add_argument(
+        '--instance-id',
+        help='AWS instance id for deriving tagsw')
 
     # Cancel Command
     cancel_parser = subparsers.add_parser(
@@ -58,20 +62,57 @@ def parse_args():
     return parser.parse_args()
 
 
-def create_reservation(client, instance_type, zone, count, tag_path, dry_run):
+def _retrieve_tags(client, instance_id):
+    """Retrieve tags from an EC2 instance"""
+    response = client.describe_tags(
+        Filters=[
+            {
+                'Name': 'resource-id',
+                'Values': [instance_id]
+            }
+        ]
+    )
+    if 'Tags' in response:
+        tags = [
+            {'Value': tag['Value'], 'Key': tag['Key']}
+            for tag in response['Tags']
+            if tag['Key'] in ['Department', 'Name', 'Project', 'SubProject']
+            ]
+        return tags
+    else:
+        metadata = response['ResponseMetadata']
+        print(f'Problem retrieving tags: {metadata}')
+        sys.exit(1)
+
+
+def _resolve_tags(client, args):
+    """If there's a tag file path in arguments, load it, otherwise,
+    assume this is an EC2 instance and try to pull its tags"""
+    if args.tags:
+        with open(args.tags) as json_file:
+            return json.load(json_file)
+    else:
+        print('No tags supplied. Attempting to retrieve tags from EC2.')
+        return _retrieve_tags(client, args.instance_id)
+
+
+def create_reservation(client, instance_type, zone, count, tags, dry_run):
     """Create a reservation for on-demand AWS EC2 instances"""
     print(
         'Creating reservation for {} {} in {}'
         .format(count, instance_type, zone))
-    with open(tag_path) as json_file:
-        tags = json.load(json_file)
-    print(tags)
+
     response = client.create_capacity_reservation(
         InstancePlatform='Linux/UNIX',
         InstanceType=instance_type,
         AvailabilityZone=zone,
         InstanceCount=count,
-        TagSpecifications=tags,
+        TagSpecifications=[
+            {
+                'ResourceType': 'capacity-reservation',
+                'Tags': tags,
+            }
+        ],
         DryRun=dry_run
     )
     print(response)
@@ -95,12 +136,13 @@ def main():
     client = session.client('ec2', region_name=region)
 
     if args.command == 'create':
+        tags = _resolve_tags(client, args)
         create_reservation(
             client,
             args.instance_type,
             args.zone,
             args.count,
-            args.tags,
+            tags,
             args.dry_run)
     elif args.command == 'cancel':
         cancel_reservation(
