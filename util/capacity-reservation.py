@@ -72,7 +72,7 @@ def _retrieve_tags(client, instance_id):
             }
         ]
     )
-    if 'Tags' in response:
+    if 'Tags' in response and len(response['Tags']) > 0:
         tags = [
             {'Value': tag['Value'], 'Key': tag['Key']}
             for tag in response['Tags']
@@ -80,8 +80,7 @@ def _retrieve_tags(client, instance_id):
             ]
         return tags
     else:
-        metadata = response['ResponseMetadata']
-        print(f'Problem retrieving tags: {metadata}')
+        print(f'Problem retrieving tags: {response}')
         sys.exit(1)
 
 
@@ -90,7 +89,11 @@ def _resolve_tags(client, args):
     assume this is an EC2 instance and try to pull its tags"""
     if args.tags:
         with open(args.tags) as json_file:
-            return json.load(json_file)
+            try:
+                return json.load(json_file)
+            except ValueError:
+                print(f'Loading tags from {args.tags} failed')
+                sys.exit(1)
     else:
         print('No tags supplied. Attempting to retrieve tags from EC2.')
         return _retrieve_tags(client, args.instance_id)
