@@ -1,6 +1,9 @@
 # Provision a Synapse External Bucket (http://docs.synapse.org/articles/custom_storage_location.html)
-template_path: remote/s3-bucket.yaml
+template:
+  type: "http"
+  url: "https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/master/s3-bucket.yaml"
 stack_name: rna-seq-reprocessing-scicomp-toil-cluster-v001-out
+stack_tags: {{stack_group_config.stack_tags}}
 dependencies:
   - prod/rna-seq-reprocessing-instance-role-v001.yaml
 parameters:
@@ -30,8 +33,3 @@ parameters:
   # to download objects in this bucket when not using an AWS resource in the same region!
   SameRegionResourceAccessToBucket: "false"
   BucketName: "rna-seq-reprocessing-scicomp-toil-cluster-v001-out"
-
-# For CI system (do not change)
-hooks:
-  before_launch:
-    - !cmd "curl https://{{stack_group_config.admincentral_cf_bucket}}.s3.amazonaws.com/aws-infra/master/s3-bucket.yaml --create-dirs -o templates/remote/s3-bucket.yaml"

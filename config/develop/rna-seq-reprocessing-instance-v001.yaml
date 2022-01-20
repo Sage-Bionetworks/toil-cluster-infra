@@ -1,9 +1,11 @@
 # Provision an EC2 instance
-template_path: toil-instance.yaml
+template:
+  path: toil-instance.yaml
 stack_name: rna-seq-reprocessing-instance-v001
 dependencies:
   - develop/toil-infra-essentials.yaml
   - develop/rna-seq-reprocessing-instance-role-v001.yaml
+stack_tags: {{stack_group_config.stack_tags}}
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "SysBio"
@@ -33,8 +35,3 @@ parameters:
   # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
   # VolumeSize: "50"
   # (Optional) Set true to enable daily backups (default: false)
-
-# For CI system (do not change)
-hooks:
-  after_create:
-    - !ec2_notify "{{stack_group_config.aws_account_name}} {{stack_group_config.aws_account_email}}"
