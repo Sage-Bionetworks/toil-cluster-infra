@@ -1,4 +1,5 @@
-template_path: toil-infra-essentials.yaml
+template:
+  path: toil-infra-essentials.yaml
 stack_name: toil-infra-essentials
 stack_tags: {{stack_group_config.stack_tags}}
 parameters:
