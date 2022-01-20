@@ -1,6 +1,7 @@
 template:
   path: toil-infra-essentials.yaml
 stack_name: toil-infra-essentials
+stack_tags: {{stack_group_config.stack_tags}}
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
   Department: "SysBio"
