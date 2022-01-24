@@ -8,13 +8,13 @@ dependencies:
 stack_tags: {{stack_group_config.stack_tags}}
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
-  Department: "SysBio"
+  Department: "IBC"
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "amp-ad"
   # A sub-project
   SubProject: "amp-ad-workflows"
   # The resource owner
-  OwnerEmail: "tess.thyer@sagebase.org"
+  OwnerEmail: "dpe@sagebase.org"
 
   VpcName: "sandcastlevpc"
   KeyName: "{{stack_group_config.toil_key_pair}}"

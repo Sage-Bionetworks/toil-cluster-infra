@@ -8,11 +8,11 @@ dependencies:
   - prod/rna-seq-reprocessing-instance-role-v001.yaml
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
-  Department: "SysBio"
+  Department: "IBC"
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "amp-ad"
   # The resource owner
-  OwnerEmail: 'tess.thyer@sagebase.org'
+  OwnerEmail: "dpe@sagebase.org"
 
   # The following parameters are only examples they are not required.
   # You may omit them if you do not need to override the defaults.

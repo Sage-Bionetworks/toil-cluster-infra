@@ -3,11 +3,11 @@ template_path: toil-instance.yaml
 stack_name: rna-seq-reprocessing-jumpbox-dev
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
-  Department: "SysBio"
+  Department: "IBC"
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "amp-ad"
   # The resource owner
-  OwnerEmail: "tess.thyer@sagebase.org"
+  OwnerEmail: "dpe@sagebase.org"
 
   VpcName: "sandcastlevpc"
   KeyName: "{{stack_group_config.toil_key_pair}}"
