@@ -5,3 +5,8 @@ admincentral_cf_bucket: "bootstrap-awss3cloudformationbucket-19qromfd235z9"
 template_key_prefix: {{ environment_variable.TRAVIS_BRANCH | default("testing") }}
 toil_key_pair: "toil"
 toil_ami: "ami-024a64a6685d05041" #ubuntu 18.04
+stack_tags:
+  Department: "IBC"
+  Project: "amp-ad"
+  OwnerEmail: "dpe@sagebase.org"
+  CostCenter: "NO PROGRAM / 000000"

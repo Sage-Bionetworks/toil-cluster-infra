@@ -1,18 +1,20 @@
 # Provision an EC2 instance
-template_path: toil-instance.yaml
+template:
+  path: toil-instance.yaml
 stack_name: rna-seq-reprocessing-scicomp-jumpbox-v001
+stack_tags: {{stack_group_config.stack_tags}}
 dependencies:
   - prod/toil-infra-essentials.yaml
   - prod/rna-seq-reprocessing-instance-role-v001.yaml
 parameters:
   # The Sage deparment (Platform, CompOnc, SysBio, Governance, etc..)
-  Department: "SysBio"
+  Department: "IBC"
   # The Sage project (Infrastructure, amp-ad, ntap, dream, etc..)
   Project: "amp-ad"
   # A sub-project
   SubProject: "amp-ad-workflows"
   # The resource owner
-  OwnerEmail: "tess.thyer@sagebase.org"
+  OwnerEmail: "dpe@sagebase.org"
 
   VpcName: "{{stack_group_config.default_vpc}}"
   KeyName: "{{stack_group_config.toil_key_pair}}"
@@ -34,8 +36,3 @@ parameters:
   # (Optional) EC2 boot volume size in GB, default is 8GB, Max is 1000GB
   # VolumeSize: "50"
   # (Optional) Set true to enable daily backups (default: false)
-
-# For CI system (do not change)
-hooks:
-  after_create:
-    - !ec2_notify "{{stack_group_config.aws_account_name}} {{stack_group_config.aws_account_email}}"

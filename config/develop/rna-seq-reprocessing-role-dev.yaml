@@ -1,4 +1,6 @@
-template_path: toil-cluster-role-and-policy.yaml
+template:
+  path: toil-cluster-role-and-policy.yaml
 stack_name: rna-seq-reprocessing-role-dev
 parameters:
   ClusterName: rna-seq-reprocessing-cluster-dev
+stack_tags: {{stack_group_config.stack_tags}}
